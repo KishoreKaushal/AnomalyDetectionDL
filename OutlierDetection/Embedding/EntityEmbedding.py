@@ -1,4 +1,6 @@
+import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class EntityEmbedding(nn.Module):
@@ -24,10 +26,15 @@ class EntityEmbedding(nn.Module):
         use_bn : bool
             True, for batch normalization
 
+        y_range : 2-tuple (min_y, max_y), optional default None
+            Range of the output variable.
     """
     def __init__(self,  embd_sizes, sz_hidden_layers, output_layer_sz,
-                 emb_layer_drop, hidden_layer_drops, use_bn=False, ):
+                 emb_layer_drop, hidden_layer_drops, use_bn=False, y_range=None):
         super(EntityEmbedding, self).__init__()
+
+        self.use_bn = use_bn
+        self.y_range = y_range
 
         self.embds = nn.ModuleList([
             nn.Embedding(num_embeddings=c, embedding_dim=s) for c,s in embd_sizes
@@ -40,17 +47,14 @@ class EntityEmbedding(nn.Module):
         conc_embd_size = sum(e.embedding_dim for e in self.embs)
 
         # linear layers followed by embedding layers
-        # embedding layers --> linear layer 1 --> ... -> linear layer n
-
         sz_hidden_layers = [conc_embd_size] + sz_hidden_layers
-        self.lins = nn.ModuleList([
+        self.linear_layers = nn.ModuleList([
             nn.Linear(sz_hidden_layers[i], sz_hidden_layers[i + 1])
             for i in range(len(sz_hidden_layers) - 1)
         ])
 
         # batch normalization layers after each linear layers
-        # emb layer -> linear layer 1 -> batch norm 1 -> ... -> batch norm n-1 -> linear layer n
-        self.batch_norms = nn.ModuleList([
+        self.batch_norm_layers = nn.ModuleList([
             nn.BatchNorm1d(sz) for sz in sz_hidden_layers[1:]
         ])
 
@@ -64,8 +68,43 @@ class EntityEmbedding(nn.Module):
 
         self.emb_drop = nn.Dropout(emb_layer_drop)
 
-        self.hidden_drops = nn.ModuleList([nn.Dropout(drop) for drop in hidden_layer_drops])
+        self.hidden_dropout_layers = nn.ModuleList([
+            nn.Dropout(drop) for drop in hidden_layer_drops
+        ])
 
 
-    def forward(self):
-        pass
+    def forward(self, input):
+        """
+            Parameters
+            ----------
+            input:  list of inputs => (num_inputance, num_categorical_features)
+
+            Return
+            ------
+            The output of the forward propagation in the network.
+        """
+        x = torch.LongTensor(input)
+        x = [e(x[:, i]) for i, e in enumerate(self.embds)]
+
+        # concatenate all embeddings
+        x = torch.cat(x, 1)
+
+        # dropout for embedding layers
+        x = self.emb_drop(x)
+
+        for linear, batch_norm, dropout in zip(self.linear_layers,
+                                               self.batch_norm_layers,
+                                               self.hidden_dropout_layers):
+            x = F.relu(linear(x))
+            if self.use_bn:
+                x = batch_norm(x)
+            x = dropout(x)
+
+            x = self.output_layer(x)
+
+        if self.y_range:
+            x = F.sigmoid(x)
+            x = x * (self.y_range[1] - self.y_range[0])
+            x = x + self.y_range[0]
+
+        return x
