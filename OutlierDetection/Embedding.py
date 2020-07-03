@@ -14,7 +14,7 @@ class EntityEmbedding(nn.Module):
         sz_hidden_layers : list of int
             Specify the size of the hidden linear layers
 
-        output_layer_sc : int
+        output_layer_sz : int
             Size of the output layers
 
         emb_layer_drop : float
@@ -44,7 +44,7 @@ class EntityEmbedding(nn.Module):
             embd.weight.data.uniform_(-1,1)
 
         # size of the vector after concatenating all the embedding layer
-        conc_embd_size = sum(e.embedding_dim for e in self.embs)
+        conc_embd_size = sum(e.embedding_dim for e in self.embds)
 
         # linear layers followed by embedding layers
         sz_hidden_layers = [conc_embd_size] + sz_hidden_layers
@@ -59,7 +59,7 @@ class EntityEmbedding(nn.Module):
         ])
 
         # initializing hidden layers
-        for out in self.lins:
+        for out in self.linear_layers:
             nn.init.kaiming_normal(out.weight.data)
 
         # initializing output layer
@@ -83,7 +83,8 @@ class EntityEmbedding(nn.Module):
             ------
             The output of the forward propagation in the network.
         """
-        x = torch.LongTensor(input)
+        x = input
+
         x = [e(x[:, i]) for i, e in enumerate(self.embds)]
 
         # concatenate all embeddings

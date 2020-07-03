@@ -1,4 +1,4 @@
-import OutlierDetection.Embedding.EntityEmbedding
+import OutlierDetection.Embedding
 
 if __name__ == "__main__":
     pass
