@@ -28,7 +28,7 @@ if str(dev) == 'cuda:0':
     Y = Y.type(torch.float).cuda()
 
 kwargs = {
-    'embd_sizes' : list(zip([df[c].nunique() for c in cat], [2, 3, 5])),
+    'embd_sizes' : list(zip([df[c].nunique() for c in cat], [3, 4, 5])),
     'sz_hidden_layers' : [10, 10],
     'output_layer_sz' : 1,
     'emb_layer_drop' : 0.5,

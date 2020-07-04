@@ -109,3 +109,7 @@ class EntityEmbedding(nn.Module):
             x = x + self.y_range[0]
 
         return x
+
+
+    def get_embedding(self, x):
+        return [e(x[i]) for i, e in enumerate(self.embds)]
