@@ -25,15 +25,15 @@ print("Using Device: ", dev)
 
 if str(dev) == 'cuda:0':
     X = X.type(torch.long).cuda()
-    Y = Y.type(torch.long).cuda()
+    Y = Y.type(torch.float).cuda()
 
 kwargs = {
     'embd_sizes' : list(zip([df[c].nunique() for c in cat], [2, 3, 5])),
-    'sz_hidden_layers' : [50, 50],
+    'sz_hidden_layers' : [10, 10],
     'output_layer_sz' : 1,
     'emb_layer_drop' : 0.5,
     'hidden_layer_drops' : [0.5, 0.5, 0.5],
-    'use_bn' : True,
+    'use_bn' : False,
     'y_range' : None
 }
 
@@ -43,14 +43,13 @@ model.to(dev)
 learning_rate = 1e-4
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-epoch = 10
+epoch = 100000
 for i in range(epoch):
-    print("\nEpoch: {}".format(i))
-
     optimizer.zero_grad()
     output = model(X)
     loss = F.mse_loss(output, Y)
     loss.backward()
     optimizer.step()
-    print('Train Epoch: {} \tLoss: {:.6f}'.format(i, loss.item()))
+    if i%100 == 0:
+        print('Train Epoch: {} \tLoss: {:.6f}'.format(i, loss.item()))
 

@@ -60,11 +60,11 @@ class EntityEmbedding(nn.Module):
 
         # initializing hidden layers
         for out in self.linear_layers:
-            nn.init.kaiming_normal(out.weight.data)
+            nn.init.kaiming_normal_(out.weight.data)
 
         # initializing output layer
         self.output_layer = nn.Linear(sz_hidden_layers[-1], output_layer_sz)
-        nn.init.kaiming_normal(self.output_layer.weight.data)
+        nn.init.kaiming_normal_(self.output_layer.weight.data)
 
         self.emb_drop = nn.Dropout(emb_layer_drop)
 
@@ -101,7 +101,7 @@ class EntityEmbedding(nn.Module):
                 x = batch_norm(x)
             x = dropout(x)
 
-            x = self.output_layer(x)
+        x = self.output_layer(x)
 
         if self.y_range:
             x = F.sigmoid(x)
