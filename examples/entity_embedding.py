@@ -74,6 +74,8 @@ for epoch in range(epochs):
     
     train_loss = 0
     for X,Y in train_loader:
+        X = X.type(torch.long).to(dev)
+        Y = Y.type(torch.long).to(dev)
         Y_pred = model(X)
         loss = F.mse_loss(Y_pred, Y)
         loss.backward()
@@ -85,6 +87,8 @@ for epoch in range(epochs):
     with torch.no_grad():
         model.eval()
         for X,Y in val_loader:
+            X = X.type(torch.long).to(dev)
+            Y = Y.type(torch.long).to(dev)
             Y_pred = model(X)
             loss = F.mse_loss(Y_pred, Y)
             val_loss = val_loss + loss.item()
