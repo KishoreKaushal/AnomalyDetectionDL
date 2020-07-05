@@ -124,4 +124,4 @@ for epoch in range(epochs):
                 optimizer.zero_grad()
 
         print("Epoch {}/{}\tPhase: {}\tLoss: {:.6f}".format(epoch + 1, epochs, phase,
-  
+                                                            running_loss/len(data_loaders[phase])))
