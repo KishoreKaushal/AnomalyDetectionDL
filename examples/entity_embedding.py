@@ -88,13 +88,6 @@ kwargs = {
 model = EntityEmbedding(**kwargs)
 model.to(dev)
 
-batch_size = 128
-epochs = 1
-
-# init dataloaders
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-
 learning_rate = 1e-4
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer.zero_grad()
