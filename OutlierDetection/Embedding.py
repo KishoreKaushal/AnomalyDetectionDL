@@ -29,19 +29,21 @@ class EntityEmbedding(nn.Module):
         y_range : 2-tuple (min_y, max_y), optional default None
             Range of the output variable.
     """
-    def __init__(self,  embd_sizes, sz_hidden_layers, output_layer_sz,
+
+    def __init__(self, embd_sizes, sz_hidden_layers, output_layer_sz,
                  emb_layer_drop, hidden_layer_drops, use_bn=False, y_range=None):
         super(EntityEmbedding, self).__init__()
 
+        self.embd_sizes = embd_sizes
         self.use_bn = use_bn
         self.y_range = y_range
 
         self.embds = nn.ModuleList([
-            nn.Embedding(num_embeddings=c, embedding_dim=s) for c,s in embd_sizes
+            nn.Embedding(num_embeddings=c, embedding_dim=s) for c, s in self.embd_sizes
         ])
 
         for embd in self.embds:
-            embd.weight.data.uniform_(-1,1)
+            embd.weight.data.uniform_(-1, 1)
 
         # size of the vector after concatenating all the embedding layer
         conc_embd_size = sum(e.embedding_dim for e in self.embds)
@@ -71,7 +73,6 @@ class EntityEmbedding(nn.Module):
         self.hidden_dropout_layers = nn.ModuleList([
             nn.Dropout(drop) for drop in hidden_layer_drops
         ])
-
 
     def forward(self, input):
         """
@@ -110,6 +111,27 @@ class EntityEmbedding(nn.Module):
 
         return x
 
-
-    def get_embedding(self, x):
+    def get_embedding_for_x(self, x):
         return [e(x[i]) for i, e in enumerate(self.embds)]
+
+    def get_feature_embedding(self, idx, feature):
+        return self.embds[feature](idx)
+
+    def get_all_feature_embedding(self, isCuda = False):
+
+        embeddings_dict = dict()
+
+        for feature, (cardinality, _) in enumerate(self.embd_sizes):
+            input = torch.LongTensor(list(range(cardinality)))
+
+            embeddings_dict[feature] = dict()
+
+            if isCuda:
+                input = input.cuda()
+
+            feature_embd = self.embds[feature](input)
+
+            for i, embd in enumerate(feature_embd):
+                embeddings_dict[feature][i] = embd
+
+        return embeddings_dict

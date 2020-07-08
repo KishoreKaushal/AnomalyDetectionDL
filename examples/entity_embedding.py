@@ -1,4 +1,5 @@
 import sys
+
 sys.path.insert(0, "../")
 
 import numpy as np
@@ -9,7 +10,9 @@ from sklearn.model_selection import train_test_split
 import torch
 from OutlierDetection.Embedding import EntityEmbedding
 import torch.nn.functional as F
-from torch.utils.data import TensorDataset,DataLoader
+from torch.utils.data import TensorDataset, DataLoader
+import pprint
+
 
 # set's random seed
 def set_seed(seed, device):
@@ -19,12 +22,13 @@ def set_seed(seed, device):
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
 
+
 seed = 33
 dev = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 print("Using Device: ", dev)
 set_seed(seed, dev)
 
-df = pd.read_pickle('../data/dataset.pkl')
+df = pd.read_pickle('../data/dataset1.pkl')
 cat = ['APIKEY', 'API', 'TIMEBIN']
 target = ['NUMREQUESTS']
 
@@ -71,22 +75,21 @@ val_loader = DataLoader(val_dataset, batch_size=val_batch_size, shuffle=False)
 
 data_loaders = {"train": train_loader, "test": val_loader}
 
-
 kwargs = {
-    'embd_sizes' : list(zip([df[c].nunique() for c in cat], embd_sizes)),
-    'sz_hidden_layers' : [10, 10],
-    'output_layer_sz' : 1,
-    'emb_layer_drop' : 0.5,
-    'hidden_layer_drops' : [0.5, 0.5, 0.5],
-    'use_bn' : False,
-    'y_range' : None
+    'embd_sizes': list(zip([df[c].nunique() for c in cat], embd_sizes)),
+    'sz_hidden_layers': [10, 10],
+    'output_layer_sz': 1,
+    'emb_layer_drop': 0.5,
+    'hidden_layer_drops': [0.5, 0.5, 0.5],
+    'use_bn': False,
+    'y_range': None
 }
 
 model = EntityEmbedding(**kwargs)
 model.to(dev)
 
 batch_size = 128
-epochs = 50
+epochs = 1
 
 # init dataloaders
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -99,7 +102,6 @@ optimizer.zero_grad()
 for epoch in range(epochs):
     optimizer.zero_grad()
 
-
     for phase in ['train', 'test']:
         running_loss = 0.0
         if phase == 'train':
@@ -108,7 +110,7 @@ for epoch in range(epochs):
             model.train(False)
 
         # Iterate over data.
-        for X,Y in data_loaders[phase]:
+        for X, Y in data_loaders[phase]:
             if str(dev) == 'cuda:0':
                 X = X.type(torch.long).cuda()
                 Y = Y.type(torch.float).cuda()
@@ -124,4 +126,9 @@ for epoch in range(epochs):
                 optimizer.zero_grad()
 
         print("Epoch {}/{}\tPhase: {}\tLoss: {:.6f}".format(epoch + 1, epochs, phase,
-                                                            running_loss/len(data_loaders[phase])))
+                                                            running_loss / len(data_loaders[phase])))
+
+print("Training Over \nHere is the embeddings: \n")
+
+pprint.pprint(kwargs)
+pprint.pprint(model.get_all_feature_embedding(True))
