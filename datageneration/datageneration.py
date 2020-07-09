@@ -14,12 +14,29 @@ def read_yaml(filename):
         except Exception as e:
             raise Exception("{} is not present. Check the path".format(filename))
 
+def expandlist(l, newlen):
+    if newlen < len(l):
+        raise Exception("new length must be higher than old length")
+    elif newlen==len(l):
+        return l
+    elif newlen%len(l)!=0:
+        raise Exception("new length must be a multiple of old length")
+    else:
+        expansion = newlen//len(l)
+        newlist = []
+        for i in range(len(l)):
+                if not isinstance(l[i],list):
+                    newlist.extend([l[i]/expansion]*expansion)
+                else:
+                    newlist.extend([list(np.array(l[i])/expansion)]*expansion)
+        return newlist
+
 def main():
     seed = 324
     np.random.seed(seed)
     filename = "config.yaml"
     params = read_yaml(filename)
-    numdaysinweek = params['inputs']['numdaysinweek']
+    numdays = params['inputs']['numdays']
     numtimebinsinday = params['inputs']['numtimebinsinday']
     enableapi = params['inputs']['enableapi']
     anamolyratio = params['inputs']['anamolyratio']
@@ -27,6 +44,9 @@ def main():
     savefile = params['inputs']['savefile']
     savepathforpkl = params['inputs']['savepathforpkl']
     savepathforcsv = params['inputs']['savepathforcsv']
+
+    # day dict
+    daydict = {0:"MON",1:"TUE",2:"WED",3:"THU",4:"FRI",5:"SAT",6:"SUN"}
 
     datalist = []
     apikeycount = 1
@@ -41,13 +61,14 @@ def main():
             for a1 in range(numapikey):
                 apikey = "APIKEY"+str(apikeycount)
                 apikeycount = apikeycount + 1
-                timebincount = 1
-                for a2 in range(numdaysinweek):
+                # timebincount = 1
+                for a2 in range(numdays):
+                    # we will assume the day start from monday
                     # weekday
-                    if a2 not in [5,6]:
+                    if a2%7 not in [5,6]:
                         numrequestsweekday = normaldistparams['numrequestsweekday']
-                        requestsclustersizeweekday = normaldistparams['requestsclustersizeweekday']
-                        apiclustersizeperbinweekday = normaldistparams['apiclustersizeperbinweekday']
+                        requestsclustersizeweekday = expandlist(normaldistparams['requestsclustersizeweekday'], numtimebinsinday)
+                        apiclustersizeperbinweekday = expandlist(normaldistparams['apiclustersizeperbinweekday'], numtimebinsinday)
                         
                         totrequests = numrequestsweekday + \
                                     np.random.randint(low=-int(0.01*numrequestsweekday),
@@ -55,34 +76,34 @@ def main():
                         requestlist = list(totrequests*np.random.dirichlet(totrequests*np.array(requestsclustersizeweekday)))
                         # looping over bins in a day
                         for a3 in range(numtimebinsinday):
-                            timebin = "BIN" + str(timebincount)
-                            timebincount = timebincount + 1
+                            timebin = "BIN" + str(a3+1)
+                            # timebincount = timebincount + 1
+                            totrequestsperbin = requestlist[a3]
                             if enableapi:
-                                totrequestsperbin = requestlist[a3]
                                 # considering cluster size of specific bin
                                 requestlistperbin = list(totrequestsperbin*np.random.dirichlet(
                                                             totrequestsperbin*np.array(apiclustersizeperbinweekday[a3])))
                                 for a4 in range(len(apiclustersizeperbinweekday[a3])):
                                     api = 'API'+str(a4)
-                                    # anamoly calculation
+                                    # it's anamoly with probability "anamolyratio"
                                     flag = np.random.binomial(1,anamolyratio)
                                     if flag:
                                         # as it an anamoly, select one of the avaliable distribution
                                         anamolydistnum = np.random.randint(low=1,high=len(allanamolydistparams)+1)
                                         anamolydistparams = allanamolydistparams[anamolydistnum]
                                         # variables
-                                        if 'numrequestsweekday' in anamolydistparams:
+                                        if anamolydistparams.get('numrequestsweekday'):
                                             numrequestsweekdayanamoly = anamolydistparams['numrequestsweekday']
                                         else:
                                             numrequestsweekdayanamoly = normaldistparams['numrequestsweekday']
-                                        if 'requestsclustersizeweekday' in anamolydistparams:
-                                            requestsclustersizeweekdayanamoly = anamolydistparams['requestsclustersizeweekday']
+                                        if anamolydistparams.get('requestsclustersizeweekday'):
+                                            requestsclustersizeweekdayanamoly = expandlist(anamolydistparams['requestsclustersizeweekday'], numtimebinsinday)
                                         else:
-                                            requestsclustersizeweekdayanamoly = normaldistparams['requestsclustersizeweekday']
-                                        if 'apiclustersizeperbinweekday' in anamolydistparams:
-                                            apiclustersizeperbinweekdayanamoly = anamolydistparams['apiclustersizeperbinweekday']
+                                            requestsclustersizeweekdayanamoly = expandlist(normaldistparams['requestsclustersizeweekday'], numtimebinsinday)
+                                        if anamolydistparams.get('apiclustersizeperbinweekday'):
+                                            apiclustersizeperbinweekdayanamoly = expandlist(anamolydistparams['apiclustersizeperbinweekday'], numtimebinsinday)
                                         else:
-                                            apiclustersizeperbinweekdayanamoly = normaldistparams['apiclustersizeperbinweekday']
+                                            apiclustersizeperbinweekdayanamoly = expandlist(normaldistparams['apiclustersizeperbinweekday'], numtimebinsinday)
                                         # as it's an anamoly we have to calculate the number of requests from the start
                                         totrequestsanamoly = numrequestsweekdayanamoly + \
                                                                 np.random.randint(low=-int(0.01*numrequestsweekdayanamoly),
@@ -95,19 +116,49 @@ def main():
                                         numfailures = int(failurepercentage*numrequests/100)
                                         numrequests = int(numrequests)
                                         label = 'ANAMOLY'
-                                        datalist.append([apikey,api,timebin,numrequests,numfailures,label,anamolydistnum])
+                                        datalist.append([apikey,api,daydict[a2%7],timebin,numrequests,numfailures,label,anamolydistnum])
                                     else:
                                         numrequests = requestlistperbin[a4]
                                         numfailures = int(failurepercentage*numrequests/100)
                                         numrequests = int(numrequests)
                                         label = 'NOT ANAMOLY'
-                                        datalist.append([apikey,api,timebin,numrequests,numfailures,label,np.nan])
+                                        datalist.append([apikey,api,daydict[a2%7],timebin,numrequests,numfailures,label,np.nan])
                             else:
-                                raise Exception("Not Implemented")
+                                # api is not enabled
+                                flag = np.random.binomial(1,anamolyratio)
+                                if flag:
+                                    # as it'a anamoly select one of the available distribution
+                                    anamolydistnum = np.random.randint(low=1,high=len(allanamolydistparams)+1)
+                                    anamolydistparams = allanamolydistparams[anamolydistnum]
+                                    # variables
+                                    if anamolydistparams.get('numrequestsweekday'):
+                                        numrequestsweekdayanamoly = anamolydistparams['numrequestsweekday']
+                                    else:
+                                        numrequestsweekdayanamoly = normaldistparams['numrequestsweekday']
+                                    if anamolydistparams.get('requestsclustersizeweekday'):
+                                        requestsclustersizeweekdayanamoly = expandlist(anamolydistparams['requestsclustersizeweekday'], numtimebinsinday)
+                                    else:
+                                        requestsclustersizeweekdayanamoly = expandlist(normaldistparams['requestsclustersizeweekday'], numtimebinsinday)
+                                    # as it's an anamoly we have to calculate the number of requests from the start
+                                    totrequestsanamoly = numrequestsweekdayanamoly + \
+                                                            np.random.randint(low=-int(0.01*numrequestsweekdayanamoly),
+                                                                            high=int(0.01*numrequestsweekdayanamoly)+1)
+                                    requestlistanamoly = list(totrequestsanamoly*np.random.dirichlet(totrequestsanamoly*np.array(requestsclustersizeweekdayanamoly)))
+                                    numrequests = requestlistanamoly[a3]
+                                    numfailures = int(failurepercentage*numrequests/100)
+                                    numrequests = int(numrequests)
+                                    label = 'ANAMOLY'
+                                    datalist.append([apikey,daydict[a2%7],timebin,numrequests,numfailures,label,anamolydistnum])
+                                else:
+                                    numrequests = requestlist[a3]
+                                    numfailures = int(failurepercentage*numrequests/100)
+                                    numrequests = int(numrequests)
+                                    label = 'NOT ANAMOLY'
+                                    datalist.append([apikey,daydict[a2%7],timebin,numrequests,numfailures,label,np.nan])
                     else: # weekend
                         numrequestsweekend = normaldistparams['numrequestsweekend']
-                        requestsclustersizeweekend = normaldistparams['requestsclustersizeweekend']
-                        apiclustersizeperbinweekend = normaldistparams['apiclustersizeperbinweekend']
+                        requestsclustersizeweekend = expandlist(normaldistparams['requestsclustersizeweekend'], numtimebinsinday)
+                        apiclustersizeperbinweekend = expandlist(normaldistparams['apiclustersizeperbinweekend'], numtimebinsinday)
                         
                         totrequests = numrequestsweekend + \
                                     np.random.randint(low=-int(0.01*numrequestsweekend),
@@ -115,34 +166,34 @@ def main():
                         requestlist = list(totrequests*np.random.dirichlet(totrequests*np.array(requestsclustersizeweekend)))
                         # looping over bins in a day
                         for a3 in range(numtimebinsinday):
-                            timebin = "BIN" + str(timebincount)
-                            timebincount = timebincount + 1
+                            timebin = "BIN" + str(a3)
+                            # timebincount = timebincount + 1
+                            totrequestsperbin = requestlist[a3]
                             if enableapi:
-                                totrequestsperbin = requestlist[a3]
                                 # considering cluster size of specific bin
                                 requestlistperbin = list(totrequestsperbin*np.random.dirichlet(
                                                             totrequestsperbin*np.array(apiclustersizeperbinweekend[a3])))                        
                                 for a4 in range(len(apiclustersizeperbinweekend[a3])):
                                     api = 'API'+str(a4)
-                                    # anamoly calculation
+                                    # it's anamoly with probability "anamolyratio"
                                     flag = np.random.binomial(1,anamolyratio)
                                     if flag:
                                         # as it an anamoly, select one of the avaliable distribution
                                         anamolydistnum = np.random.randint(low=1,high=len(allanamolydistparams)+1)
                                         anamolydistparams = allanamolydistparams[anamolydistnum]
                                         # variables
-                                        if 'numrequestsweekend' in anamolydistparams:
+                                        if anamolydistparams.get('numrequestsweekend'):
                                             numrequestsweekendanamoly = anamolydistparams['numrequestsweekend']
                                         else:
                                             numrequestsweekendanamoly = normaldistparams['numrequestsweekend']
-                                        if 'requestsclustersizeweekend' in anamolydistparams:    
-                                            requestsclustersizeweekendanamoly = anamolydistparams['requestsclustersizeweekend']
+                                        if anamolydistparams.get('requestsclustersizeweekend'):
+                                            requestsclustersizeweekendanamoly = expandlist(anamolydistparams['requestsclustersizeweekend'], numtimebinsinday)
                                         else:
-                                            requestsclustersizeweekendanamoly = normaldistparams['requestsclustersizeweekend']
-                                        if 'apiclustersizeperbinweekend' in anamolydistparams:    
-                                            apiclustersizeperbinweekendanamoly = anamolydistparams['apiclustersizeperbinweekend']
+                                            requestsclustersizeweekendanamoly = expandlist(normaldistparams['requestsclustersizeweekend'], numtimebinsinday)
+                                        if anamolydistparams.get('apiclustersizeperbinweekend'):
+                                            apiclustersizeperbinweekendanamoly = expandlist(anamolydistparams['apiclustersizeperbinweekend'], numtimebinsinday)
                                         else:
-                                            apiclustersizeperbinweekendanamoly = normaldistparams['apiclustersizeperbinweekend']
+                                            apiclustersizeperbinweekendanamoly = expandlist(normaldistparams['apiclustersizeperbinweekend'], numtimebinsinday)
                                         # as it's an anamoly we have to calculate the number of requests from the start
                                         totrequestsanamoly = numrequestsweekendanamoly + \
                                                                 np.random.randint(low=-int(0.01*numrequestsweekendanamoly),
@@ -155,20 +206,50 @@ def main():
                                         numfailures = int(failurepercentage*numrequests/100)
                                         numrequests = int(numrequests)
                                         label = 'ANAMOLY'
-                                        datalist.append([apikey,api,timebin,numrequests,numfailures,label,anamolydistnum])
+                                        datalist.append([apikey,api,daydict[a2%7],timebin,numrequests,numfailures,label,anamolydistnum])
                                     else:
                                         numrequests = requestlistperbin[a4]
                                         numfailures = int(failurepercentage*numrequests/100)
                                         numrequests = int(numrequests)
                                         label = 'NOT ANAMOLY'
-                                        datalist.append([apikey,api,timebin,numrequests,numfailures,label,np.nan])
+                                        datalist.append([apikey,api,daydict[a2%7],timebin,numrequests,numfailures,label,np.nan])
                             else:
-                                raise Exception("Not Implemented")
+                                # api is not enabled
+                                flag = np.random.binomial(1,anamolyratio)
+                                if flag:
+                                    # as it'a anamoly select one of the available distribution
+                                    anamolydistnum = np.random.randint(low=1,high=len(allanamolydistparams)+1)
+                                    anamolydistparams = allanamolydistparams[anamolydistnum]
+                                    # variables
+                                    if anamolydistparams.get('numrequestsweekend'):
+                                        numrequestsweekendanamoly = anamolydistparams['numrequestsweekend']
+                                    else:
+                                        numrequestsweekendanamoly = normaldistparams['numrequestsweekend']
+                                    if anamolydistparams.get('requestsclustersizeweekend'):    
+                                        requestsclustersizeweekendanamoly = expandlist(anamolydistparams['requestsclustersizeweekend'], numtimebinsinday)
+                                    else:
+                                        requestsclustersizeweekendanamoly = expandlist(normaldistparams['requestsclustersizeweekend'], numtimebinsinday)
+                                    # as it's an anamoly we have to calculate the number of requests from the start
+                                    totrequestsanamoly = numrequestsweekendanamoly + \
+                                                            np.random.randint(low=-int(0.01*numrequestsweekendanamoly),
+                                                                            high=int(0.01*numrequestsweekendanamoly)+1)
+                                    requestlistanamoly = list(totrequestsanamoly*np.random.dirichlet(totrequestsanamoly*np.array(requestsclustersizeweekendanamoly)))
+                                    numrequests = requestlistanamoly[a3]
+                                    numfailures = int(failurepercentage*numrequests/100)
+                                    numrequests = int(numrequests)
+                                    label = 'ANAMOLY'
+                                    datalist.append([apikey,daydict[a2%7],timebin,numrequests,numfailures,label,anamolydistnum])
+                                else:
+                                    numrequests = requestlist[a3]
+                                    numfailures = int(failurepercentage*numrequests/100)
+                                    numrequests = int(numrequests)
+                                    label = 'NOT ANAMOLY'
+                                    datalist.append([apikey,daydict[a2%7],timebin,numrequests,numfailures,label,np.nan])
 
     if enableapi:
-        columns=['APIKEY','API','TIMEBIN','NUMREQUESTS','NUMFAILURES','LABEL','ANAMOLYDISTNUM']
+        columns=['APIKEY','API','DAY','TIMEBIN','NUMREQUESTS','NUMFAILURES','LABEL','ANAMOLYDISTNUM']
     else:
-        raise Exception("Not Implemented")
+        columns = ['APIKEY','DAY','TIMEBIN','NUMREQUESTS','NUMFAILURES','LABEL','ANAMOLYDISTNUM']
         
     data = pd.DataFrame(datalist, columns=columns)
     print(data.shape)
