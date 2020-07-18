@@ -1,14 +1,14 @@
 inputs:
   savefile: True
   enableapi: False
-  numdays: 30
+  numdays: 7
   numtimebinsinday: 144
-  savepathforpkl: "datasets/dataset.pkl"
-  savepathforcsv: "datasets/dataset.csv"
+  savepathforpkl: "datasets/test.pkl"
+  savepathforcsv: "datasets/test.csv"
   normaldistributions:
     GROUPA:
       1:
-        numapikey: 300
+        numapikey: 30
         failurepercentage: 3
         numrequestsweekday: 30000
         numrequestsweekend: 10000
@@ -17,7 +17,7 @@ inputs:
         apiclustersizeperbinweekday: [[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1]]
         apiclustersizeperbinweekend: [[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1]]
       2:
-        numapikey: 200
+        numapikey: 20
         failurepercentage: 3
         numrequestsweekday: 30000
         numrequestsweekend: 10000
@@ -26,7 +26,7 @@ inputs:
         apiclustersizeperbinweekday: [[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1]]
         apiclustersizeperbinweekend: [[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1]]
       3:
-        numapikey: 150
+        numapikey: 15
         failurepercentage: 3
         numrequestsweekday: 30000
         numrequestsweekend: 10000
@@ -35,7 +35,7 @@ inputs:
         apiclustersizeperbinweekday: [[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1]]
         apiclustersizeperbinweekend: [[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1]]
       4:
-        numapikey: 50
+        numapikey: 5
         failurepercentage: 3
         numrequestsweekday: 30000
         numrequestsweekend: 10000
@@ -45,7 +45,7 @@ inputs:
         apiclustersizeperbinweekend: [[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3]]
     GROUPB:
       1:
-        numapikey: 300
+        numapikey: 30
         failurepercentage: 3
         numrequestsweekday: 10000
         numrequestsweekend: 30000
@@ -54,7 +54,7 @@ inputs:
         apiclustersizeperbinweekday: [[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1]]
         apiclustersizeperbinweekend: [[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1]]
       2:
-        numapikey: 200
+        numapikey: 20
         failurepercentage: 3
         numrequestsweekday: 10000
         numrequestsweekend: 30000
@@ -63,7 +63,7 @@ inputs:
         apiclustersizeperbinweekday: [[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1]]
         apiclustersizeperbinweekend: [[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1]]
       3:
-        numapikey: 150
+        numapikey: 15
         failurepercentage: 3
         numrequestsweekday: 10000
         numrequestsweekend: 30000
@@ -72,7 +72,7 @@ inputs:
         apiclustersizeperbinweekday: [[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1]]
         apiclustersizeperbinweekend: [[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1]]
       4:
-        numapikey: 50
+        numapikey: 5
         failurepercentage: 3
         numrequestsweekday: 10000
         numrequestsweekend: 30000
