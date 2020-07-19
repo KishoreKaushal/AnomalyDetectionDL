@@ -1,10 +1,10 @@
 inputs:
   savefile: True
   enableapi: False
-  numdays: 21
+  numdays: 7
   numtimebinsinday: 144
-  savepathforpkl: "datasets/train_19072020.pkl"
-  savepathforcsv: "datasets/train_19072020.csv"
+  savepathforpkl: "datasets/test_19072020.pkl"
+  savepathforcsv: "datasets/test_19072020.csv"
   normaldistributions:
     GROUPA:
       1:
