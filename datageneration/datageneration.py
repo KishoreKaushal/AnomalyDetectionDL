@@ -93,7 +93,7 @@ def main():
                                         anamolydistparams = allanamolydistparams[anamolydistnum]
                                         # variables
                                         if anamolydistparams.get('numrequestsweekday'):
-                                            numrequestsweekdayanamoly = anamolydistparams['numrequestsweekday']
+                                            numrequestsweekdayanamoly = anamolydistparams['numrequestsweekday']*normaldistparams['numrequestsweekday']
                                         else:
                                             numrequestsweekdayanamoly = normaldistparams['numrequestsweekday']
                                         if anamolydistparams.get('requestsclustersizeweekday'):
@@ -132,7 +132,7 @@ def main():
                                     anamolydistparams = allanamolydistparams[anamolydistnum]
                                     # variables
                                     if anamolydistparams.get('numrequestsweekday'):
-                                        numrequestsweekdayanamoly = anamolydistparams['numrequestsweekday']
+                                        numrequestsweekdayanamoly = anamolydistparams['numrequestsweekday']*normaldistparams['numrequestsweekday']
                                     else:
                                         numrequestsweekdayanamoly = normaldistparams['numrequestsweekday']
                                     if anamolydistparams.get('requestsclustersizeweekday'):
@@ -183,7 +183,7 @@ def main():
                                         anamolydistparams = allanamolydistparams[anamolydistnum]
                                         # variables
                                         if anamolydistparams.get('numrequestsweekend'):
-                                            numrequestsweekendanamoly = anamolydistparams['numrequestsweekend']
+                                            numrequestsweekendanamoly = anamolydistparams['numrequestsweekend']*normaldistparams['numrequestsweekend']
                                         else:
                                             numrequestsweekendanamoly = normaldistparams['numrequestsweekend']
                                         if anamolydistparams.get('requestsclustersizeweekend'):
@@ -222,7 +222,7 @@ def main():
                                     anamolydistparams = allanamolydistparams[anamolydistnum]
                                     # variables
                                     if anamolydistparams.get('numrequestsweekend'):
-                                        numrequestsweekendanamoly = anamolydistparams['numrequestsweekend']
+                                        numrequestsweekendanamoly = anamolydistparams['numrequestsweekend']*normaldistparams['numrequestsweekend']
                                     else:
                                         numrequestsweekendanamoly = normaldistparams['numrequestsweekend']
                                     if anamolydistparams.get('requestsclustersizeweekend'):    
