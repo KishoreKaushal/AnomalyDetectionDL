@@ -3,8 +3,8 @@ inputs:
   enableapi: False
   numdays: 7
   numtimebinsinday: 144
-  savepathforpkl: "datasets/test_19072020.pkl"
-  savepathforcsv: "datasets/test_19072020.csv"
+  savepathforpkl: "datasets/test_24072020.pkl"
+  savepathforcsv: "datasets/test_24072020.csv"
   normaldistributions:
     GROUPA:
       1:
@@ -84,9 +84,9 @@ inputs:
   anamolydistributions:
     GROUPA:
       1:
-        numrequestsweekday: 120000
-        numrequestsweekend: 40000
+        numrequestsweekday: 3
+        numrequestsweekend: 3
     GROUPB:
       1:
-        numrequestsweekday: 40000
-        numrequestsweekend: 120000
+        numrequestsweekday: 3
+        numrequestsweekend: 3
