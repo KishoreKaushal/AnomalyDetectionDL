@@ -17,7 +17,7 @@ import os
 import seaborn as sns; sns.set()
 import matplotlib.pyplot as plt
 
-path = "~/dataset/train_withapi_01082020.pkl"
+path = "~/dataset/train_01082020.pkl"
 df = pd.read_pickle(path)
 
 day_dict = {
@@ -35,7 +35,7 @@ def pre_process(df, inplace=True):
         df = df.copy()
     df['APIKEY'] = df['APIKEY'].apply(lambda x: x.replace("APIKEY", "")).astype(int)
     df['TIMEBIN'] = df['TIMEBIN'].apply(lambda x: x.replace("BIN", "")).astype(int)
-    df['API'] = df['API'].apply(lambda x: x.replace("API", "")).astype(int)
+    # df['API'] = df['API'].apply(lambda x: x.replace("API", "")).astype(int)
     df['DAY'] = df['DAY'].apply(lambda x : day_dict[x]).astype(int)
     df.drop(columns=['ANAMOLYDISTNUM', 'LABEL', 'NUMFAILURES'], inplace=True)
 
@@ -44,7 +44,7 @@ def pre_process(df, inplace=True):
 
 pre_process(df)
 
-cat = ['APIKEY', 'API', 'DAY', 'TIMEBIN']
+cat = ['APIKEY', 'DAY', 'TIMEBIN']
 target = ['NUMREQUESTS']
 
 
@@ -85,8 +85,8 @@ print("X_train.shape : {} Y_train.shape : {}".format(X_train.shape, Y_train.shap
 train_dataset = TensorDataset(X_train, Y_train)
 val_dataset = TensorDataset(X_test, Y_test)
 
-train_batch_size = 64
-val_batch_size = 64
+train_batch_size = 128
+val_batch_size = 128
 epochs = 50
 
 # init dataloaders
@@ -106,7 +106,7 @@ kwargs = {
     'output_layer_sz': 1,
     'emb_layer_drop': 0.5,
     'hidden_layer_drops': [0.5, 0.5, 0.5],
-    'use_bn': False,
+    'use_bn': True,
     'y_range': None
 }
 
@@ -130,8 +130,8 @@ def exit_gracefully():
 
     # save the model
     print("\nTraining curve saved in current folder with name: training_curve.png")
-    plt.plot(np.arange(len(train_loss)), train_loss, label='Training loss')
-    plt.plot(np.arange(len(validation_loss)), label='Validation loss')
+    plt.plot(np.arange(len(train_loss[1:])), train_loss[1:], label='Training loss')
+    plt.plot(np.arange(len(validation_loss[1:])), validation_loss[1:], label='Validation loss')
     plt.ylabel("Average Loss")
     plt.xlabel("Epoch")
     plt.title("Training Curve")
