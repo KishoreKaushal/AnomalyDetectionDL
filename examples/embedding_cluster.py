@@ -1,3 +1,4 @@
+from datetime import datetime
 import sys
 
 sys.path.insert(0, "../")
@@ -11,6 +12,10 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 import pprint
 import time
+import os
+
+import seaborn as sns; sns.set()
+import matplotlib.pyplot as plt
 
 path = "~/dataset/train_withapi_01082020.pkl"
 df = pd.read_pickle(path)
@@ -80,8 +85,8 @@ print("X_train.shape : {} Y_train.shape : {}".format(X_train.shape, Y_train.shap
 train_dataset = TensorDataset(X_train, Y_train)
 val_dataset = TensorDataset(X_test, Y_test)
 
-train_batch_size = 256
-val_batch_size = 256
+train_batch_size = 64
+val_batch_size = 64
 epochs = 50
 
 # init dataloaders
@@ -90,12 +95,14 @@ val_loader = DataLoader(val_dataset, batch_size=val_batch_size, shuffle=False)
 
 data_loaders = {"train": train_loader, "test": val_loader}
 
+
+embd_sizes = np.sqrt([df[c].nunique() for c in cat]).astype(np.int)
 kwargs = {
     'embd_sizes': list(zip(
                             [df[c].nunique() for c in cat], # number of unique values for a feature
-                            np.sqrt([df[c].nunique() for c in cat]).astype(np.int) # size of embedding
+                            embd_sizes # size of embedding
                         )),
-    'sz_hidden_layers': [10, 10],
+    'sz_hidden_layers': [int(2/3 * np.sum(embd_sizes)), int(2/3 * 2/3 * np.sum(embd_sizes))],
     'output_layer_sz': 1,
     'emb_layer_drop': 0.5,
     'hidden_layer_drops': [0.5, 0.5, 0.5],
@@ -112,37 +119,82 @@ learning_rate = 1e-4
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer.zero_grad()
 
-for epoch in range(epochs):
-    optimizer.zero_grad()
+train_loss = [0]
+validation_loss = [0]
 
-    tic = time.time()
-    for phase in ['train', 'test']:
-        running_loss = 0.0
-        if phase == 'train':
-            model.train(True)
-        else:
-            model.train(False)
+def exit_gracefully():
+    global model
+    global train_loss
+    global validation_loss
+    global path
 
-        # Iterate over data.
+    # save the model
+    print("\nTraining curve saved in current folder with name: training_curve.png")
+    plt.plot(np.arange(len(train_loss)), train_loss, label='Training loss')
+    plt.plot(np.arange(len(validation_loss)), label='Validation loss')
+    plt.ylabel("Average Loss")
+    plt.xlabel("Epoch")
+    plt.title("Training Curve")
+    plt.legend()
+    plt.savefig("training_curve.png")
+
+    now = datetime.now()
+    timestamp_str = now.strftime('%d_%m_%Y_%H_%M_%S')
+    save_model_path = "./saved_model/" + os.path.basename(path) + "_entity_embedding_" + timestamp_str + ".pt"
+    print("Saving model at: {}".format(os.path.abspath(save_model_path)))
+    torch.save(model, save_model_path)
+
+    exit(0)
+
+try:
+    for epoch in range(epochs):
+        optimizer.zero_grad()
+
         tic = time.time()
-        for X, Y in data_loaders[phase]:
+        for phase in ['train', 'test']:
+            running_loss = 0.0
+            if phase == 'train':
+                model.train(True)
+            else:
+                model.train(False)
 
-            if str(dev) == 'cuda:0':
-                X = X.type(torch.long).cuda()
-                Y = Y.type(torch.float).cuda()
+            # Iterate over data.
+            tic = time.time()
+            for X, Y in data_loaders[phase]:
 
-            Y_pred = model(X)
-            loss = F.mse_loss(Y_pred, Y)
+                if str(dev) == 'cuda:0':
+                    X = X.type(torch.long).cuda()
+                    Y = Y.type(torch.float).cuda()
 
-            running_loss += loss.item()
+                Y_pred = model(X)
+                loss = F.mse_loss(Y_pred, Y)
+
+                running_loss += loss.item()
+
+                if phase == 'train':
+                    loss.backward()
+                    optimizer.step()
+                    optimizer.zero_grad()
+            toc = time.time()
+
+            avg_loss = running_loss / len(data_loaders[phase])
 
             if phase == 'train':
-                loss.backward()
-                optimizer.step()
-                optimizer.zero_grad()
-        toc = time.time()
+                train_loss.append(avg_loss)
+            else:
+                validation_loss.append(avg_loss)
 
-        print("Epoch {}/{}\tPhase: {}\tLoss: {:.6f}\tTE: {:.3f}".format(epoch + 1, epochs, phase,
-                                                            running_loss / len(data_loaders[phase]), toc-tic))
+                if np.abs(validation_loss[-1] - validation_loss[-2]) < 1e-3:
+                    print("\nEarly stopping...")
+                    exit_gracefully()
 
-print("Training Over \nHere is the embeddings: \n")
+            print("Epoch {}/{}\tPhase: {}\tLoss: {:.6f}\tTE: {:.3f}".format(epoch + 1, epochs, phase,
+                                                                avg_loss, toc-tic))
+except KeyboardInterrupt:
+    pass
+
+exit_gracefully()
+
+
+
+# print("Training Over \nHere is the embeddings: \n")
