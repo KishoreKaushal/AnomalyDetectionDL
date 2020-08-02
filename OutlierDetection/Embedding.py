@@ -86,6 +86,14 @@ class EntityEmbedding(nn.Module):
         """
         x = input
 
+        # print("INPUT : ", input)
+        # temp = []
+        # for i, e in enumerate(self.embds):
+        #     print("i : ", i)
+        #     import pdb;pdb.set_trace()
+        #     temp.append(e(x[:, i]))
+
+
         x = [e(x[:, i]) for i, e in enumerate(self.embds)]
 
         # concatenate all embeddings

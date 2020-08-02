@@ -28,21 +28,22 @@ dev = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu
 print("Using Device: ", dev)
 set_seed(seed, dev)
 
-df = pd.read_pickle('../data/dataset1.pkl')
-cat = ['APIKEY', 'API', 'TIMEBIN']
+df = pd.read_pickle('~/dataset/train_24072020.pkl')
+cat = ['APIKEY', 'DAY', 'TIMEBIN']
 target = ['NUMREQUESTS']
 
 print("Shape of Datafram : ", df.shape)
 print("NUM APIKEY: ", df['APIKEY'].nunique())
-print("NUM API: ", df['API'].nunique())
+print("NUM DAY: ", df['DAY'].nunique())
 print("NUM TIMEBIN: ", df['TIMEBIN'].nunique())
 
-embd_sizes = np.sqrt([df['APIKEY'].nunique(), df['API'].nunique(), df['TIMEBIN'].nunique()]).astype(np.int)
+embd_sizes = np.sqrt([df['APIKEY'].nunique(), df['DAY'].nunique(), df['TIMEBIN'].nunique()]).astype(np.int)
 
 df_cat = df[cat]
 
 enc = OrdinalEncoder()
 df_cat = enc.fit_transform(df_cat)
+
 # splitting the dataset into train and validation
 df_train, df_val, df_cat_train, df_cat_val = train_test_split(df, df_cat, test_size=0.2, random_state=seed)
 
@@ -53,6 +54,7 @@ Y_train = torch.Tensor(Y_train)
 
 X_test = torch.Tensor(X_test)
 Y_test = torch.Tensor(Y_test)
+
 
 #
 # X = torch.Tensor(df_cat)
@@ -85,6 +87,8 @@ kwargs = {
     'y_range': None
 }
 
+print(kwargs)
+
 model = EntityEmbedding(**kwargs)
 model.to(dev)
 
@@ -105,8 +109,14 @@ for epoch in range(epochs):
         # Iterate over data.
         for X, Y in data_loaders[phase]:
             if str(dev) == 'cuda:0':
+                print("Transfering to CUDA\n")
                 X = X.type(torch.long).cuda()
                 Y = Y.type(torch.float).cuda()
+
+            print("\n\nX : {} , \nXshape : {}".format(X, X.shape))
+            print("\n\nY : {} , \nYshape : {}".format(Y, Y.shape))
+
+            # exit(0)
 
             Y_pred = model(X)
             loss = F.mse_loss(Y_pred, Y)

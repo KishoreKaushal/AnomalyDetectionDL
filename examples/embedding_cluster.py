@@ -10,32 +10,28 @@ from OutlierDetection.Embedding import EntityEmbedding
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 import pprint
+import time
 
-path = "~/dataset/train_24072020.pkl"
+path = "~/dataset/train_withapi_01082020.pkl"
 df = pd.read_pickle(path)
 
-# preprocessing
 day_dict = {
-    'SUN' : 1,
-    'MON' : 2,
-    'TUE' : 3,
-    'WED' : 4,
-    'THU' : 5,
-    'FRI' : 6,
-    'SAT' : 7
+    'MON' : 0,
+    'TUE' : 1,
+    'WED' : 2,
+    'THU' : 3,
+    'FRI' : 4,
+    'SAT' : 5,
+    'SUN' : 6
 }
 
 def pre_process(df, inplace=True):
     if not inplace:
         df = df.copy()
-
     df['APIKEY'] = df['APIKEY'].apply(lambda x: x.replace("APIKEY", "")).astype(int)
-
     df['TIMEBIN'] = df['TIMEBIN'].apply(lambda x: x.replace("BIN", "")).astype(int)
-    df['TIMEBIN'] = df['TIMEBIN'].apply(lambda x: x+1)
-
+    df['API'] = df['API'].apply(lambda x: x.replace("API", "")).astype(int)
     df['DAY'] = df['DAY'].apply(lambda x : day_dict[x]).astype(int)
-
     df.drop(columns=['ANAMOLYDISTNUM', 'LABEL', 'NUMFAILURES'], inplace=True)
 
     df = df.dropna()
@@ -43,15 +39,14 @@ def pre_process(df, inplace=True):
 
 pre_process(df)
 
-cat = ['APIKEY', 'DAY', 'TIMEBIN']
+cat = ['APIKEY', 'API', 'DAY', 'TIMEBIN']
 target = ['NUMREQUESTS']
-
-for c in cat:
-    print("\n\nCATEGORY: {}".format(c))
-    print(df[c].unique())
 
 
 print(df.head())
+print("------------------------------------------------- \nNum Uniques: ")
+for c in cat:
+    print("{} : {}".format(c, df[c].nunique()))
 
 # splitting the dataset into train and validation
 X_train, X_test, Y_train, Y_test = train_test_split(df[cat].values, np.log1p(df[target].values), test_size=0.2)
@@ -79,14 +74,14 @@ Y_train = torch.Tensor(Y_train)
 X_test = torch.Tensor(X_test)
 Y_test = torch.Tensor(Y_test)
 
-print(X_train, Y_train)
+print("X_train.shape : {} Y_train.shape : {}".format(X_train.shape, Y_train.shape))
 
 # converting it to Tensor datasets
 train_dataset = TensorDataset(X_train, Y_train)
 val_dataset = TensorDataset(X_test, Y_test)
 
-train_batch_size = 128
-val_batch_size = 128
+train_batch_size = 256
+val_batch_size = 256
 epochs = 50
 
 # init dataloaders
@@ -120,6 +115,7 @@ optimizer.zero_grad()
 for epoch in range(epochs):
     optimizer.zero_grad()
 
+    tic = time.time()
     for phase in ['train', 'test']:
         running_loss = 0.0
         if phase == 'train':
@@ -128,14 +124,12 @@ for epoch in range(epochs):
             model.train(False)
 
         # Iterate over data.
+        tic = time.time()
         for X, Y in data_loaders[phase]:
+
             if str(dev) == 'cuda:0':
-                print("Transfering to CUDA\n")
                 X = X.type(torch.long).cuda()
                 Y = Y.type(torch.float).cuda()
-
-            print("\n\nX : {} , \nXshape : {}".format(X, X.shape))
-            print("\n\nY : {} , \nYshape : {}".format(Y, Y.shape))
 
             Y_pred = model(X)
             loss = F.mse_loss(Y_pred, Y)
@@ -146,8 +140,9 @@ for epoch in range(epochs):
                 loss.backward()
                 optimizer.step()
                 optimizer.zero_grad()
+        toc = time.time()
 
-        print("Epoch {}/{}\tPhase: {}\tLoss: {:.6f}".format(epoch + 1, epochs, phase,
-                                                            running_loss / len(data_loaders[phase])))
+        print("Epoch {}/{}\tPhase: {}\tLoss: {:.6f}\tTE: {:.3f}".format(epoch + 1, epochs, phase,
+                                                            running_loss / len(data_loaders[phase]), toc-tic))
 
 print("Training Over \nHere is the embeddings: \n")
