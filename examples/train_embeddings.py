@@ -97,6 +97,7 @@ data_loaders = {"train": train_loader, "test": val_loader}
 
 
 embd_sizes = np.sqrt([df[c].nunique() for c in cat]).astype(np.int)
+
 kwargs = {
     'embd_sizes': list(zip(
                             [df[c].nunique() for c in cat], # number of unique values for a feature
@@ -107,7 +108,12 @@ kwargs = {
     'emb_layer_drop': 0.5,
     'hidden_layer_drops': [0.5, 0.5, 0.5],
     'use_bn': True,
-    'y_range': None
+    'y_range': None,
+    'meta': {
+        'isCuda' : True,
+        'embeddingFeature' : cat,
+        'targetFeature' : target
+    }
 }
 
 pprint.pprint(kwargs)
@@ -194,7 +200,3 @@ except KeyboardInterrupt:
     pass
 
 exit_gracefully()
-
-
-
-# print("Training Over \nHere is the embeddings: \n")
