@@ -31,12 +31,16 @@ class EntityEmbedding(nn.Module):
     """
 
     def __init__(self, embd_sizes, sz_hidden_layers, output_layer_sz,
-                 emb_layer_drop, hidden_layer_drops, use_bn=False, y_range=None):
+                 emb_layer_drop, hidden_layer_drops, use_bn=False, y_range=None, meta=None):
         super(EntityEmbedding, self).__init__()
 
         self.embd_sizes = embd_sizes
         self.use_bn = use_bn
         self.y_range = y_range
+        self.meta = meta
+
+        if self.meta == None:
+            self.meta['isCuda'] = False
 
         self.embds = nn.ModuleList([
             nn.Embedding(num_embeddings=c, embedding_dim=s) for c, s in self.embd_sizes
@@ -125,7 +129,7 @@ class EntityEmbedding(nn.Module):
     def get_feature_embedding(self, idx, feature):
         return self.embds[feature](idx)
 
-    def get_all_feature_embedding(self, isCuda = False):
+    def get_all_feature_embedding(self):
 
         embeddings_dict = dict()
 
@@ -134,12 +138,12 @@ class EntityEmbedding(nn.Module):
 
             embeddings_dict[feature] = dict()
 
-            if isCuda:
+            if self.meta['isCuda']:
                 input = input.cuda()
 
             feature_embd = self.embds[feature](input)
 
             for i, embd in enumerate(feature_embd):
-                embeddings_dict[feature][i] = embd
+                embeddings_dict[feature][i] = embd.cpu().detach().numpy()
 
         return embeddings_dict
