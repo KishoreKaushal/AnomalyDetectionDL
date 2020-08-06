@@ -1,17 +1,17 @@
 inputs:
   savefile: True
-  enableapi: False
+  enableapi: True
   numdays: 7
   numtimebinsinday: 144
-  savepathforpkl: "datasets/test_24072020.pkl"
-  savepathforcsv: "datasets/test_24072020.csv"
+  savepathforpkl: "datasets/test_withapi_01082020.pkl"
+  savepathforcsv: "datasets/test_withapi_01082020.csv"
   normaldistributions:
     GROUPA:
       1:
         numapikey: 30
         failurepercentage: 3
-        numrequestsweekday: 30000
-        numrequestsweekend: 10000
+        numrequestsweekday: 300000
+        numrequestsweekend: 100000
         requestsclustersizeweekday: [0.025,0.05,0.1,0.25,0.25,0.25,0.05,0.025]
         requestsclustersizeweekend: [0.05,0.025,0.025,0.05,0.1,0.25,0.25,0.25]
         apiclustersizeperbinweekday: [[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1],[0.7,0.1,0.1,0.1]]
@@ -19,8 +19,8 @@ inputs:
       2:
         numapikey: 30
         failurepercentage: 3
-        numrequestsweekday: 3000
-        numrequestsweekend: 1000
+        numrequestsweekday: 30000
+        numrequestsweekend: 10000
         requestsclustersizeweekday: [0.025,0.05,0.15,0.20,0.25,0.25,0.05,0.025]
         requestsclustersizeweekend: [0.0375,0.0375,0.025,0.05,0.1,0.25,0.25,0.25]
         apiclustersizeperbinweekday: [[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1]]
@@ -28,8 +28,8 @@ inputs:
       3:
         numapikey: 5
         failurepercentage: 3
-        numrequestsweekday: 30000
-        numrequestsweekend: 10000
+        numrequestsweekday: 300000
+        numrequestsweekend: 100000
         requestsclustersizeweekday: [0.025,0.05,0.1,0.25,0.25,0.25,0.05,0.025]
         requestsclustersizeweekend: [0.05,0.025,0.025,0.05,0.1,0.25,0.25,0.25]
         apiclustersizeperbinweekday: [[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1]]
@@ -37,8 +37,8 @@ inputs:
       4:
         numapikey: 5
         failurepercentage: 3
-        numrequestsweekday: 2000
-        numrequestsweekend: 1000
+        numrequestsweekday: 20000
+        numrequestsweekend: 10000
         requestsclustersizeweekday: [0.025,0.05,0.15,0.20,0.25,0.25,0.05,0.025]
         requestsclustersizeweekend: [0.0375,0.0375,0.025,0.05,0.1,0.25,0.25,0.25]
         apiclustersizeperbinweekday: [[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3]]
@@ -56,8 +56,8 @@ inputs:
       2:
         numapikey: 20
         failurepercentage: 3
-        numrequestsweekday: 10000
-        numrequestsweekend: 30000
+        numrequestsweekday: 100000
+        numrequestsweekend: 300000
         requestsclustersizeweekday: [0.025,0.05,0.1,0.25,0.25,0.25,0.0375,0.0375]
         requestsclustersizeweekend: [0.25,0.025,0.0375,0.0375,0.05,0.1,0.25,0.25]
         apiclustersizeperbinweekday: [[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1],[0.4,0.3,0.2,0.1]]
@@ -65,8 +65,8 @@ inputs:
       3:
         numapikey: 5
         failurepercentage: 3
-        numrequestsweekday: 1000
-        numrequestsweekend: 3000
+        numrequestsweekday: 10000
+        numrequestsweekend: 30000
         requestsclustersizeweekday: [0.025,0.05,0.1,0.25,0.25,0.25,0.0375,0.0375]
         requestsclustersizeweekend: [0.25,0.025,0.025,0.05,0.05,0.1,0.25,0.25]
         apiclustersizeperbinweekday: [[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1],[0.6,0.1,0.2,0.1]]
@@ -74,8 +74,8 @@ inputs:
       4:
         numapikey: 20
         failurepercentage: 3
-        numrequestsweekday: 10000
-        numrequestsweekend: 30000
+        numrequestsweekday: 100000
+        numrequestsweekend: 300000
         requestsclustersizeweekday: [0.025,0.05,0.1,0.25,0.25,0.25,0.05,0.025]
         requestsclustersizeweekend: [0.25,0.025,0.025,0.05,0.05,0.1,0.25,0.25]
         apiclustersizeperbinweekday: [[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3],[0.1,0.5,0.1,0.3]]
@@ -84,9 +84,23 @@ inputs:
   anamolydistributions:
     GROUPA:
       1:
-        numrequestsweekday: 3
-        numrequestsweekend: 3
+        numrequestsweekday: 4
+        numrequestsweekend: 4
+      2:
+        numrequestsweekday: 1
+        numrequestsweekend: 1
+        requestsclustersizeweekday: [0.025,0.05,0.1,0.25,0.25,0.25,0.05,0.025]
+        requestsclustersizeweekend: [0.05,0.025,0.025,0.05,0.1,0.25,0.25,0.25]
+        apiclustersizeperbinweekday: [[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85]]
+        apiclustersizeperbinweekend: [[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85]]
     GROUPB:
       1:
-        numrequestsweekday: 3
-        numrequestsweekend: 3
+        numrequestsweekday: 4
+        numrequestsweekend: 4
+      2:
+        numrequestsweekday: 1
+        numrequestsweekend: 1
+        requestsclustersizeweekday: [0.025,0.05,0.1,0.25,0.25,0.25,0.05,0.025]
+        requestsclustersizeweekend: [0.25,0.025,0.025,0.05,0.05,0.1,0.25,0.25]
+        apiclustersizeperbinweekday: [[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85]]
+        apiclustersizeperbinweekend: [[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85],[0.05,0.05,0.05,0.85]]

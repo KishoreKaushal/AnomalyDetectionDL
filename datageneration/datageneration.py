@@ -49,7 +49,7 @@ def main():
     daydict = {0:"MON",1:"TUE",2:"WED",3:"THU",4:"FRI",5:"SAT",6:"SUN"}
 
     datalist = []
-    apikeycount = 1
+    apikeycount = 0
     for group in tqdm.tqdm(params['inputs']['normaldistributions'].keys()):
         for normaldistnum in params['inputs']['normaldistributions'][group].keys():
             normaldistparams = params['inputs']['normaldistributions'][group][normaldistnum]
@@ -76,7 +76,7 @@ def main():
                         requestlist = list(totrequests*np.random.dirichlet(totrequests*np.array(requestsclustersizeweekday)))
                         # looping over bins in a day
                         for a3 in range(numtimebinsinday):
-                            timebin = "BIN" + str(a3+1)
+                            timebin = "BIN" + str(a3)
                             # timebincount = timebincount + 1
                             totrequestsperbin = requestlist[a3]
                             if enableapi:
